@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: eventiq-analytics-worker
+
+server:
+  port: 9053
