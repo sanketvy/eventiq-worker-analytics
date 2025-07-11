@@ -1,6 +1,67 @@
 spring:
   application:
     name: eventiq-analytics-worker
+  cassandra:
+    contact-points: 127.0.0.1   # Or container IP / service name
+    port: 9042
+    keyspace-name: eventiq_keyspace
+    local-datacenter: datacenter1       # Must match `dc` in cassandra-rackdc.properties
+    schema-action: create-if-not-exists  # or none, validate, recreate-drop-unused
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  config:
+    import: "consul:localhost:8500"
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        hostname: localhost
+        prefer-ip-address: false
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}-${server.port}
+      config:
+        enabled: true
+        format: yaml
+        data-key: data
+
+    function:
+      definition: processAnalytics
+
+    stream:
+      default:
+        binder: kafka
+
+      bindings:
+        processAnalytics-in-0:
+          destination: eventiq-analytics-topic
+          group: event-workers
+          content-type: application/json
+          consumer:
+            batch-mode: true
+
+      kafka:
+        bindings:
+          processAnalytics-in-0:
+            consumer:
+              batch-mode: true
+              max-poll-records: 10  # Optional, for controlling batch size
+
+      binders:
+        kafka:
+          type: kafka
+          environment:
+            spring:
+              kafka:
+                bootstrap-servers: localhost:9092
 
 server:
   port: 9053
