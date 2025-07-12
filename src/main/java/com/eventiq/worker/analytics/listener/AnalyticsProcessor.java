@@ -35,8 +35,6 @@ public class AnalyticsProcessor {
 
                 if(event.getType().equals(Constants.EVENT_SESSION_START)){
                     redisTemplate.opsForHash().increment(key, Constants.SESSION_COUNT, 1);
-                } else if (event.getType().equals(Constants.EVENT_SESSION_END)){
-                    redisTemplate.opsForHash().increment(key, Constants.SESSION_COUNT, -1);
                 } else if (event.getType().equals(Constants.EVENT_CLICK)){
                     redisTemplate.opsForHash().increment(key, Constants.CLICK_COUNT, 1);
                 } else if (event.getType().equals(Constants.EVENT_VISITED)){

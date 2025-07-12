@@ -29,14 +29,14 @@ public class FlushMemoryToDB {
         this.analyticsRepository = analyticsRepository;
     }
 
-    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Scheduled(cron = "0 */5 * * * *")
     public void flushCacheDataToDB(){
         boolean leader = Boolean.TRUE.equals(
                 redisTemplate.opsForValue().setIfAbsent(Constants.DISTRIBUTED_LEADER, "lock", 4 * 60 + 59, TimeUnit.SECONDS)
         );
 
         if (!leader) return;
-
+        log.info("Flush Cache Job Started");
         Set<Object> projects = redisTemplate.opsForSet().members(Constants.HOT_PROJECTS);
 
         if (projects == null || projects.isEmpty()) return;
